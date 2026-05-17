@@ -54,9 +54,14 @@ export default function ScrollyCanvas({ frameCount }: ScrollyCanvasProps) {
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Draw with better quality
+    
+    // Draw with better quality only on larger screens to avoid mobile lag
+    const isMobile = window.innerWidth < 768;
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
+    if (!isMobile) {
+      ctx.imageSmoothingQuality = "high";
+    }
+    
     ctx.drawImage(img, renderX, renderY, renderWidth, renderHeight);
   }, [images]);
 
@@ -97,8 +102,10 @@ export default function ScrollyCanvas({ frameCount }: ScrollyCanvasProps) {
     if (!canvas) return;
 
     const resize = () => {
-      // Use devicePixelRatio for sharper canvas on high-DPI displays
-      const dpr = window.devicePixelRatio || 1;
+      // Limit DPR on mobile to 1 to drastically improve performance and fix scroll lag
+      const isMobile = window.innerWidth < 768;
+      const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
+      
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
       

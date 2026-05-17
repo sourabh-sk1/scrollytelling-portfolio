@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useScroll, useMotionValueEvent } from "framer-motion";
 import Overlay from "./Overlay";
 
@@ -13,37 +13,16 @@ export default function ScrollyCanvas({ frameCount }: ScrollyCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  
+  const currentIndexRef = useRef(0);
+  const drawImageRef = useRef<(index: number) => void>();
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  // Preload images
-  useEffect(() => {
-    let loadedCount = 0;
-    const loadedImages: HTMLImageElement[] = [];
-
-    for (let i = 0; i < frameCount; i++) {
-      const img = new Image();
-      // Pad to 3 digits e.g., 000, 001
-      const frameNumber = i.toString().padStart(3, "0");
-      img.src = `/sequence/frame_${frameNumber}_delay-0.041s.png`;
-      
-      img.onload = () => {
-        loadedCount++;
-        if (loadedCount === frameCount) {
-          setImagesLoaded(true);
-        }
-      };
-      // Keep order
-      loadedImages.push(img);
-    }
-    
-    setImages(loadedImages);
-  }, [frameCount]);
-
-  const drawImage = (index: number) => {
+  const drawImage = useCallback((index: number) => {
     if (!canvasRef.current || images.length === 0 || !images[index]) return;
     
     const canvas = canvasRef.current;
@@ -51,6 +30,9 @@ export default function ScrollyCanvas({ frameCount }: ScrollyCanvasProps) {
     if (!ctx) return;
 
     const img = images[index];
+
+    // If the image hasn't finished downloading yet, do not clear the canvas
+    if (!img.complete || img.naturalWidth === 0) return;
 
     // Handle object-fit: cover logic
     const canvasRatio = canvas.width / canvas.height;
@@ -76,7 +58,38 @@ export default function ScrollyCanvas({ frameCount }: ScrollyCanvasProps) {
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(img, renderX, renderY, renderWidth, renderHeight);
-  };
+  }, [images]);
+
+  // Keep ref up to date
+  useEffect(() => {
+    drawImageRef.current = drawImage;
+  }, [drawImage]);
+
+  // Preload images
+  useEffect(() => {
+    const loadedImages: HTMLImageElement[] = [];
+
+    for (let i = 0; i < frameCount; i++) {
+      const img = new Image();
+      const frameNumber = i.toString().padStart(3, "0");
+      img.src = `/sequence/frame_${frameNumber}_delay-0.041s.png`;
+      
+      img.onload = () => {
+        // As soon as the first frame loads, dismiss the loading screen
+        if (i === 0) {
+          setImagesLoaded(true);
+        }
+        // If the user stopped scrolling on this frame, draw it immediately now that it's loaded
+        if (currentIndexRef.current === i && drawImageRef.current) {
+          drawImageRef.current(i);
+        }
+      };
+      
+      loadedImages.push(img);
+    }
+    
+    setImages(loadedImages);
+  }, [frameCount]);
 
   // Initial draw and handle resize
   useEffect(() => {
@@ -95,6 +108,7 @@ export default function ScrollyCanvas({ frameCount }: ScrollyCanvasProps) {
       
       // Redraw current frame
       const index = Math.floor(scrollYProgress.get() * (frameCount - 1));
+      currentIndexRef.current = index;
       drawImage(index);
     };
 
@@ -102,14 +116,14 @@ export default function ScrollyCanvas({ frameCount }: ScrollyCanvasProps) {
     resize(); // call once to set up
 
     return () => window.removeEventListener("resize", resize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imagesLoaded, frameCount, scrollYProgress]);
+  }, [imagesLoaded, frameCount, scrollYProgress, drawImage]);
 
   // Update frame on scroll
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     if (imagesLoaded) {
       // Calculate which frame to show
       const index = Math.floor(latest * (frameCount - 1));
+      currentIndexRef.current = index;
       drawImage(index);
     }
   });

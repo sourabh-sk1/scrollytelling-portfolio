@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Scrollytelling Portfolio
 
-## Getting Started
+A modern, immersive personal portfolio built with Next.js, React, and Tailwind CSS.
 
-First, run the development server:
+Live Demo: https://scrollytelling-portfolio-roan.vercel.app/
+
+## Overview
+
+This portfolio presents a polished scrollytelling experience optimized for storytelling, visuals, and responsive performance. The site showcases dynamic project highlights, custom scroll-based interactions, and a clean layout designed for modern web presentation.
+
+## Key Features
+
+- Custom scrollytelling animation and canvas visuals
+- Responsive design for desktop and mobile screens
+- Fast page transitions and smooth scrolling interactions
+- Minimal, professional portfolio layout with strong focus on content
+- Fully deployed on Vercel for reliable hosting and performance
+
+## Project Structure
+
+- `src/app` — Next.js application entry points and global configuration
+- `src/components` — Reusable UI components for the portfolio sections
+- `public/sequence` — Visual assets and sequence content used by the scrollytelling canvas
+- `tailwind.config.ts` — Tailwind CSS configuration
+- `next.config.mjs` — Next.js runtime configuration
+
+## Technologies Used
+
+- Next.js 14+ (App Router)
+- React 18+
+- Tailwind CSS
+- TypeScript
+- Vercel deployment
+
+## Local Development
+
+Install dependencies and start the development server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 to view the portfolio locally.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The site is deployed on Vercel and available at:
 
-## Learn More
+https://scrollytelling-portfolio-roan.vercel.app/
 
-To learn more about Next.js, take a look at the following resources:
+## Contribution
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This portfolio is configured for easy updates and enhancements. To extend the project, add new sections in `src/components`, update the page layout in `src/app/page.tsx`, and manage styling through Tailwind classes.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Created to present a strong personal brand with interactive storytelling and a modern web experience.
